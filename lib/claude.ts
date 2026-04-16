@@ -8,12 +8,18 @@ export function getAnthropicClient() {
   return new Anthropic({ apiKey });
 }
 
-export async function callClaude(prompt: string, maxTokens: number = 8000): Promise<string> {
+export async function callClaude(prompt: string, maxTokens: number = 4000): Promise<string> {
   const client = getAnthropicClient();
+
+  let truncatedPrompt = prompt;
+  if (prompt.length > 80000) {
+    truncatedPrompt = prompt.slice(0, 80000) + '\n\n[Content truncated for processing speed]';
+  }
+
   const message = await client.messages.create({
     model: 'claude-sonnet-4-5',
     max_tokens: maxTokens,
-    messages: [{ role: 'user', content: prompt }],
+    messages: [{ role: 'user', content: truncatedPrompt }],
   });
 
   const textBlocks = message.content
